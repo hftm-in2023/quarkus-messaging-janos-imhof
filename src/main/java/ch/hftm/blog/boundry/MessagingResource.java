@@ -15,7 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 public class MessagingResource {
 
     @Inject
-    @Channel("source")
+    @Channel("source-outgoing")
     Emitter<String> emitter;
 
     // Aufgabe d) - Sendet eine einzelne Message in den "source"-Channel
