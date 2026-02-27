@@ -1,0 +1,53 @@
+package ch.hftm.boundary;
+
+import java.util.List;
+
+import ch.hftm.control.BlogService;
+import ch.hftm.entity.Blog;
+import io.quarkus.logging.Log;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.Response;
+
+@Path("/blogs")
+public class BlogResource {
+
+    @Inject
+    BlogService blogService;
+
+    @GET
+    public List<Blog> getBlogs() {
+        Log.info("GET /blogs");
+        return blogService.getBlogs();
+    }
+
+    @GET
+    @Path("{id}")
+    public Response getBlog(@PathParam("id") long id) {
+        Log.info("GET /blogs/" + id);
+        Blog blog = blogService.getBlog(id);
+        if (blog == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.ok(blog).build();
+    }
+
+    @POST
+    public Response addBlog(Blog blog) {
+        Log.info("POST /blogs - " + blog.getTitle());
+        blogService.addBlog(blog);
+        return Response.status(Response.Status.CREATED).entity(blog).build();
+    }
+
+    @DELETE
+    @Path("{id}")
+    public Response deleteBlog(@PathParam("id") long id) {
+        Log.info("DELETE /blogs/" + id);
+        blogService.deleteBlog(id);
+        return Response.noContent().build();
+    }
+}
