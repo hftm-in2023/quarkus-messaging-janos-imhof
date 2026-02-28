@@ -2,8 +2,12 @@ package ch.hftm.boundary;
 
 import java.util.List;
 
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
+
 import ch.hftm.control.BlogService;
 import ch.hftm.entity.Blog;
+import ch.hftm.messaging.ValidationRequest;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;
@@ -18,6 +22,10 @@ public class BlogResource {
 
     @Inject
     BlogService blogService;
+
+    @Inject
+    @Channel("validation-request")
+    Emitter<ValidationRequest> validationRequestEmitter;
 
     @GET
     public List<Blog> getBlogs() {
@@ -40,6 +48,11 @@ public class BlogResource {
     public Response addBlog(Blog blog) {
         Log.info("POST /blogs - " + blog.getTitle());
         blogService.addBlog(blog);
+
+        validationRequestEmitter.send(
+            new ValidationRequest(blog.getId(), "BLOG", blog.getTitle() + " " + blog.getContent())
+        );
+        Log.info("Validation request sent for blog id=" + blog.getId());
         return Response.status(Response.Status.CREATED).entity(blog).build();
     }
 

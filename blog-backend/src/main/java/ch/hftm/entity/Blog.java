@@ -16,6 +16,8 @@ public class Blog {
 
     private String content;
 
+    private String validationStatus;
+
     private LocalDateTime createdAt;
 
     public Blog() {}
@@ -23,6 +25,7 @@ public class Blog {
     public Blog(String title, String content) {
         this.title = title;
         this.content = content;
+        this.validationStatus = "PENDING";
         this.createdAt = LocalDateTime.now();
     }
 
@@ -44,6 +47,14 @@ public class Blog {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getValidationStatus() {
+        return this.validationStatus;
+    }
+
+    public void setValidationStatus(String validationStatus) {
+        this.validationStatus = validationStatus;
     }
 
     public LocalDateTime getCreatedAt() {
