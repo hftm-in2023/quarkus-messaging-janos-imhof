@@ -20,6 +20,11 @@ public class BlogService {
         return blogRepository.listAll();
     }
 
+    public List<Blog> getBlogsByStatus(String status) {
+        Log.info("Getting blogs with status=" + status);
+        return blogRepository.list("validationStatus", status);
+    }
+
     public Blog getBlog(long id) {
         Blog blog = blogRepository.findById(id);
         if (blog == null) {

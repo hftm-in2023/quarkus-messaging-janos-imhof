@@ -15,6 +15,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 
 @Path("/blogs")
@@ -28,8 +29,11 @@ public class BlogResource {
     Emitter<ValidationRequest> validationRequestEmitter;
 
     @GET
-    public List<Blog> getBlogs() {
-        Log.info("GET /blogs");
+    public List<Blog> getBlogs(@QueryParam("status") String status) {
+        Log.info("GET /blogs" + (status != null ? "?status=" + status : ""));
+        if (status != null) {
+            return blogService.getBlogsByStatus(status);
+        }
         return blogService.getBlogs();
     }
 
