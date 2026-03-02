@@ -1,0 +1,54 @@
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v23.3.5
+    container_name: redpanda-1
+    command:
+      - redpanda
+      - start
+      - --advertise-kafka-addr redpanda-1:9092
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "info", "--brokers=localhost:9092"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redpanda-init:
+    image: docker.redpanda.com/redpandadata/redpanda:v23.3.5
+    container_name: redpanda-init
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    entrypoint: >
+      /bin/bash -c "
+        rpk topic create text-validation-request text-validation-response summary-request summary-response comment-events --brokers=redpanda-1:9092 &&
+        echo 'Topics created successfully'
+      "
+
+  blog-backend:
+    image: ghcr.io/janizzle/blog-backend:latest
+    container_name: blog-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+
+  text-processing-service:
+    image: ghcr.io/janizzle/text-processing-service:latest
+    container_name: text-processing
+    ports:
+      - "8081:8081"
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+
+  notification-service:
+    image: ghcr.io/janizzle/notification-service:latest
+    container_name: notification
+    ports:
+      - "8082:8082"
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
