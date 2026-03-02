@@ -5,8 +5,11 @@ import java.util.List;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 
+import ch.hftm.control.BlogService;
 import ch.hftm.control.CommentService;
+import ch.hftm.entity.Blog;
 import ch.hftm.entity.Comment;
+import ch.hftm.messaging.CommentEvent;
 import ch.hftm.messaging.ValidationRequest;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
@@ -24,8 +27,15 @@ public class CommentResource {
     CommentService commentService;
 
     @Inject
+    BlogService blogService;
+
+    @Inject
     @Channel("validation-request")
     Emitter<ValidationRequest> validationRequestEmitter;
+
+    @Inject
+    @Channel("comment-events")
+    Emitter<CommentEvent> commentEventEmitter;
 
     @GET
     public List<Comment> getComments(@PathParam("blogId") long blogId) {
@@ -38,10 +48,18 @@ public class CommentResource {
         Log.info("POST /blogs/" + blogId + "/comments - " + comment.getAuthor());
         Comment saved = commentService.addComment(blogId, comment);
 
+        Blog blog = blogService.getBlog(blogId);
+
         validationRequestEmitter.send(
             new ValidationRequest(saved.getId(), "COMMENT", saved.getContent())
         );
         Log.info("Validation request sent for comment id=" + saved.getId());
+
+        commentEventEmitter.send(
+            new CommentEvent(blogId, blog.getTitle(), saved.getAuthor(), saved.getContent())
+        );
+        Log.info("Comment event sent for blog id=" + blogId);
+
         return Response.status(Response.Status.CREATED).entity(saved).build();
     }
 }
