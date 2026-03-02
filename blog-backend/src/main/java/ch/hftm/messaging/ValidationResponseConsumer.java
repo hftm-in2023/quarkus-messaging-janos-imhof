@@ -8,6 +8,8 @@ import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 
 @ApplicationScoped
@@ -18,6 +20,10 @@ public class ValidationResponseConsumer {
 
     @Inject
     CommentRepository commentRepository;
+
+    @Inject
+    @Channel("summary-request")
+    Emitter<SummaryRequest> summaryRequestEmitter;
 
     @Incoming("validation-response")
     @Transactional
@@ -30,6 +36,11 @@ public class ValidationResponseConsumer {
                 if (blog != null) {
                     blog.setValidationStatus(status);
                     Log.info("Updated blog id=" + response.sourceId() + " validationStatus=" + status);
+
+                    if (response.valid()) {
+                        summaryRequestEmitter.send(new SummaryRequest(blog.getId(), blog.getContent()));
+                        Log.info("Summary request sent for blog id=" + blog.getId());
+                    }
                 } else {
                     Log.warn("Blog not found for sourceId=" + response.sourceId());
                 }
