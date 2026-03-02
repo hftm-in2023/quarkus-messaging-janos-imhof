@@ -16,6 +16,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Response;
 
 @Path("/blogs")
@@ -49,7 +50,7 @@ public class BlogResource {
     }
 
     @POST
-    public Response addBlog(Blog blog) {
+    public Response addBlog(@Valid Blog blog) {
         Log.info("POST /blogs - " + blog.getTitle());
         blogService.addBlog(blog);
 

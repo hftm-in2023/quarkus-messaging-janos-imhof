@@ -14,6 +14,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Response;
 
 @Path("/blogs/{blogId}/comments")
@@ -33,7 +34,7 @@ public class CommentResource {
     }
 
     @POST
-    public Response addComment(@PathParam("blogId") long blogId, Comment comment) {
+    public Response addComment(@PathParam("blogId") long blogId, @Valid Comment comment) {
         Log.info("POST /blogs/" + blogId + "/comments - " + comment.getAuthor());
         Comment saved = commentService.addComment(blogId, comment);
 

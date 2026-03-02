@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 public class Blog {
@@ -12,8 +13,10 @@ public class Blog {
     @GeneratedValue
     private Long id;
 
+    @NotBlank(message = "Title darf nicht leer sein")
     private String title;
 
+    @NotBlank(message = "Content darf nicht leer sein")
     private String content;
 
     private String validationStatus;
