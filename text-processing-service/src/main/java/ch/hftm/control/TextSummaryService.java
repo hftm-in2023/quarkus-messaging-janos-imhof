@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional;
 @ApplicationScoped
 public class TextSummaryService {
 
-    private static final int MAX_SUMMARY_LENGTH = 200;
+    private static final int MAX_SUMMARY_LENGTH = 50;
 
     public String summarize(String text) {
         if (text == null || text.isBlank()) {
