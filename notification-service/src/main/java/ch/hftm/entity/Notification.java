@@ -3,6 +3,7 @@ package ch.hftm.entity;
 import java.time.LocalDateTime;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 
 @Entity
@@ -12,6 +13,7 @@ public class Notification extends PanacheEntity {
     public String blogTitle;
     public String commentAuthor;
     public String message;
+    @Column(name = "`read`")
     public boolean read;
     public LocalDateTime createdAt;
 
