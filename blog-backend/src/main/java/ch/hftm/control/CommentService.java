@@ -5,6 +5,7 @@ import java.util.List;
 
 import ch.hftm.entity.Blog;
 import ch.hftm.entity.Comment;
+import ch.hftm.entity.ValidationStatus;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -31,7 +32,7 @@ public class CommentService {
             throw new IllegalArgumentException("Blog mit ID " + blogId + " nicht gefunden.");
         }
         comment.setBlog(blog);
-        comment.setValidationStatus("PENDING");
+        comment.setValidationStatus(ValidationStatus.PENDING);
         comment.setCreatedAt(LocalDateTime.now());
         commentRepository.persist(comment);
         Log.info("Added comment id=" + comment.getId() + " to blog id=" + blogId);

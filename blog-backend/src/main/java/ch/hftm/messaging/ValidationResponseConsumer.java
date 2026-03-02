@@ -4,6 +4,7 @@ import ch.hftm.control.BlogRepository;
 import ch.hftm.control.CommentRepository;
 import ch.hftm.entity.Blog;
 import ch.hftm.entity.Comment;
+import ch.hftm.entity.ValidationStatus;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -28,7 +29,7 @@ public class ValidationResponseConsumer {
     @Incoming("validation-response")
     @Transactional
     public void handleValidationResponse(ValidationResponse response) {
-        String status = response.valid() ? "APPROVED" : "REJECTED";
+        ValidationStatus status = response.valid() ? ValidationStatus.APPROVED : ValidationStatus.REJECTED;
 
         switch (response.sourceType()) {
             case "BLOG" -> {

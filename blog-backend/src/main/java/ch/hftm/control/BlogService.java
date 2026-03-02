@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import ch.hftm.entity.Blog;
+import ch.hftm.entity.ValidationStatus;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -22,7 +23,8 @@ public class BlogService {
 
     public List<Blog> getBlogsByStatus(String status) {
         Log.info("Getting blogs with status=" + status);
-        return blogRepository.list("validationStatus", status);
+        ValidationStatus validationStatus = ValidationStatus.valueOf(status.toUpperCase());
+        return blogRepository.list("validationStatus", validationStatus);
     }
 
     public Blog getBlog(long id) {
@@ -36,6 +38,7 @@ public class BlogService {
     @Transactional
     public void addBlog(Blog blog) {
         Log.info("Adding blog: " + blog.getTitle());
+        blog.setValidationStatus(ValidationStatus.PENDING);
         blog.setCreatedAt(LocalDateTime.now());
         blogRepository.persist(blog);
     }

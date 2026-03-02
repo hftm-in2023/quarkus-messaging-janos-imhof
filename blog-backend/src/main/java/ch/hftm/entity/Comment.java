@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
@@ -25,7 +27,8 @@ public class Comment {
     @NotBlank(message = "Content darf nicht leer sein")
     private String content;
 
-    private String validationStatus;
+    @Enumerated(EnumType.STRING)
+    private ValidationStatus validationStatus;
 
     private LocalDateTime createdAt;
 
@@ -34,7 +37,7 @@ public class Comment {
     public Comment(String author, String content) {
         this.author = author;
         this.content = content;
-        this.validationStatus = "PENDING";
+        this.validationStatus = ValidationStatus.PENDING;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -66,11 +69,11 @@ public class Comment {
         this.content = content;
     }
 
-    public String getValidationStatus() {
+    public ValidationStatus getValidationStatus() {
         return this.validationStatus;
     }
 
-    public void setValidationStatus(String validationStatus) {
+    public void setValidationStatus(ValidationStatus validationStatus) {
         this.validationStatus = validationStatus;
     }
 

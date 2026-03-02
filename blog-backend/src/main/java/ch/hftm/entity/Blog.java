@@ -3,6 +3,8 @@ package ch.hftm.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
@@ -19,7 +21,8 @@ public class Blog {
     @NotBlank(message = "Content darf nicht leer sein")
     private String content;
 
-    private String validationStatus;
+    @Enumerated(EnumType.STRING)
+    private ValidationStatus validationStatus;
 
     private String summary;
 
@@ -30,7 +33,7 @@ public class Blog {
     public Blog(String title, String content) {
         this.title = title;
         this.content = content;
-        this.validationStatus = "PENDING";
+        this.validationStatus = ValidationStatus.PENDING;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -54,11 +57,11 @@ public class Blog {
         this.content = content;
     }
 
-    public String getValidationStatus() {
+    public ValidationStatus getValidationStatus() {
         return this.validationStatus;
     }
 
-    public void setValidationStatus(String validationStatus) {
+    public void setValidationStatus(ValidationStatus validationStatus) {
         this.validationStatus = validationStatus;
     }
 
