@@ -106,7 +106,7 @@ curl -s -X PUT http://localhost:8082/notifications/1/read | jq
 5. **Kommentar** -- Beim Erstellen wird ein Kommentar-Event an Kafka gesendet
 6. **Notification** -- Notification-Service erstellt eine Benachrichtigung
 
-## Dev-Modus (Entwicklung)
+## Dev-Modus
 
 Für lokal ohne Docker:
 
