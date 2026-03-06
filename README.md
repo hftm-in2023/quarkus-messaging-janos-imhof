@@ -121,4 +121,7 @@ cd text-processing-service && ./mvnw quarkus:dev
 cd notification-service && ./mvnw quarkus:dev
 ```
 
-Dev Services starten automatisch Kafka und MySQL.
+## AI-Usage
+| Tool        | Provider  | Version / Period   | Purpose of Use                                      | Scope of Use                                                           |
+|-------------|-----------|--------------------|-----------------------------------------------------|------------------------------------------------------------------------|
+| Claude Code | Anthropic | Opus 4.6, 2026 | Brainstorming, Code suggestions, Documentation help | blog-backend, notification-service, text-processing-service, README.md |
