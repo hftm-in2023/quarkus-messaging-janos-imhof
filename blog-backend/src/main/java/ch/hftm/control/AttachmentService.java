@@ -32,17 +32,17 @@ public class AttachmentService {
             InputStream fileData) {
         Blog blog = blogRepository.findById(blogId);
         if (blog == null) {
-            throw new IllegalArgumentException("Blog mit ID " + blogId + " nicht gefunden.");
+            throw new IllegalArgumentException("Blog with ID " + blogId + " not found.");
         }
 
         if (fileSize > MAX_FILE_SIZE) {
             throw new IllegalArgumentException(
-                    "Datei ist zu gross. Maximale Groesse: 5 MB, aktuelle Groesse: " + (fileSize / 1024) + " KB.");
+                    "File too large. Maximum size: 5 MB, actual size: " + (fileSize / 1024) + " KB.");
         }
 
         if (!ALLOWED_CONTENT_TYPES.contains(contentType)) {
             throw new IllegalArgumentException(
-                    "Dateityp '" + contentType + "' nicht erlaubt. Erlaubt: " + ALLOWED_CONTENT_TYPES);
+                    "Content type '" + contentType + "' not allowed. Allowed: " + ALLOWED_CONTENT_TYPES);
         }
 
         String objectKey = "blogs/" + blogId + "/" + UUID.randomUUID() + "_" + fileName;
@@ -60,7 +60,7 @@ public class AttachmentService {
     public List<Attachment> getAttachments(Long blogId) {
         Blog blog = blogRepository.findById(blogId);
         if (blog == null) {
-            throw new IllegalArgumentException("Blog mit ID " + blogId + " nicht gefunden.");
+            throw new IllegalArgumentException("Blog with ID " + blogId + " not found.");
         }
         return attachmentRepository.findByBlogId(blogId);
     }
@@ -68,7 +68,7 @@ public class AttachmentService {
     public Attachment getAttachment(Long blogId, Long attachmentId) {
         Attachment attachment = attachmentRepository.findById(attachmentId);
         if (attachment == null || !attachment.getBlog().getId().equals(blogId)) {
-            throw new IllegalArgumentException("Attachment mit ID " + attachmentId + " nicht gefunden fuer Blog " + blogId + ".");
+            throw new IllegalArgumentException("Attachment with ID " + attachmentId + " not found for blog " + blogId + ".");
         }
         return attachment;
     }
