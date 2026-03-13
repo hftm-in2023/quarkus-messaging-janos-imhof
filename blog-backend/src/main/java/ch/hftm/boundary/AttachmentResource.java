@@ -14,6 +14,7 @@ import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -90,6 +91,15 @@ public class AttachmentResource {
                 .header("Content-Disposition", "inline; filename=\"" + attachment.getFileName() + "\"")
                 .header("Content-Length", attachment.getFileSize())
                 .build();
+    }
+
+    @DELETE
+    @Path("{attachmentId}")
+    public Response deleteAttachment(@PathParam("blogId") Long blogId,
+            @PathParam("attachmentId") Long attachmentId) {
+        Log.info("DELETE /blogs/" + blogId + "/attachments/" + attachmentId);
+        attachmentService.deleteAttachment(blogId, attachmentId);
+        return Response.noContent().build();
     }
 
     private String errorJson(String message) {
