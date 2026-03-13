@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.List;
 
+import static ch.hftm.control.AttachmentService.ALLOWED_CONTENT_TYPES;
+import static ch.hftm.control.AttachmentService.MAX_FILE_SIZE;
+
 import ch.hftm.control.AttachmentService;
 import ch.hftm.entity.Attachment;
 import io.quarkus.logging.Log;
@@ -21,10 +24,6 @@ import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 @Path("/blogs/{blogId}/attachments")
 public class AttachmentResource {
-
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-    private static final List<String> ALLOWED_CONTENT_TYPES = List.of(
-            "image/jpeg", "image/png", "image/gif", "application/pdf");
 
     @Inject
     AttachmentService attachmentService;

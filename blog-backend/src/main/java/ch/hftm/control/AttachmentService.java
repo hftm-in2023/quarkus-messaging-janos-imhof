@@ -14,8 +14,8 @@ import jakarta.transaction.Transactional;
 @ApplicationScoped
 public class AttachmentService {
 
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-    private static final List<String> ALLOWED_CONTENT_TYPES = List.of(
+    public static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+    public static final List<String> ALLOWED_CONTENT_TYPES = List.of(
             "image/jpeg", "image/png", "image/gif", "application/pdf");
 
     @Inject
