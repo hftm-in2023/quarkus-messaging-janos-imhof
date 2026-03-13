@@ -14,9 +14,11 @@ import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.RestForm;
@@ -67,6 +69,27 @@ public class AttachmentResource {
                     .entity(errorJson("Error processing the uploaded file."))
                     .build();
         }
+    }
+
+    @GET
+    public List<Attachment> getAttachments(@PathParam("blogId") Long blogId) {
+        Log.info("GET /blogs/" + blogId + "/attachments");
+        return attachmentService.getAttachments(blogId);
+    }
+
+    @GET
+    @Path("{attachmentId}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadAttachment(@PathParam("blogId") Long blogId,
+            @PathParam("attachmentId") Long attachmentId) {
+        Log.info("GET /blogs/" + blogId + "/attachments/" + attachmentId);
+        Attachment attachment = attachmentService.getAttachment(blogId, attachmentId);
+        InputStream fileStream = attachmentService.downloadAttachment(blogId, attachmentId);
+        return Response.ok(fileStream)
+                .header("Content-Type", attachment.getContentType())
+                .header("Content-Disposition", "inline; filename=\"" + attachment.getFileName() + "\"")
+                .header("Content-Length", attachment.getFileSize())
+                .build();
     }
 
     private String errorJson(String message) {
