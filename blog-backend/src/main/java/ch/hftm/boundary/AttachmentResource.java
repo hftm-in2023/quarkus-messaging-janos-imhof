@@ -7,8 +7,10 @@ import java.util.List;
 
 import ch.hftm.boundary.exception.FileStorageException;
 import ch.hftm.boundary.exception.FileValidationException;
+import ch.hftm.boundary.exception.ResourceNotFoundException;
 import ch.hftm.control.AttachmentService;
 import ch.hftm.control.FileValidator;
+import ch.hftm.control.MinioService;
 import ch.hftm.entity.Attachment;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
@@ -29,6 +31,9 @@ public class AttachmentResource {
 
     @Inject
     AttachmentService attachmentService;
+
+    @Inject
+    MinioService minioService;
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -73,6 +78,24 @@ public class AttachmentResource {
                 .header("Content-Type", attachment.getContentType())
                 .header("Content-Disposition", "inline; filename=\"" + attachment.getFileName() + "\"")
                 .header("Content-Length", attachment.getFileSize())
+                .build();
+    }
+
+    @GET
+    @Path("{attachmentId}/thumbnail")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadThumbnail(@PathParam("blogId") Long blogId,
+            @PathParam("attachmentId") Long attachmentId) {
+        Log.info("GET /blogs/" + blogId + "/attachments/" + attachmentId + "/thumbnail");
+        Attachment attachment = attachmentService.getAttachment(blogId, attachmentId);
+        if (attachment.getThumbnailKey() == null) {
+            throw new ResourceNotFoundException("No thumbnail available for attachment " + attachmentId + ".");
+        }
+        InputStream thumbStream = minioService.downloadFile(attachment.getThumbnailKey());
+        return Response.ok(thumbStream)
+                .header("Content-Type", attachment.getContentType())
+                .header("Content-Disposition",
+                        "inline; filename=\"thumb_" + attachment.getFileName() + "\"")
                 .build();
     }
 

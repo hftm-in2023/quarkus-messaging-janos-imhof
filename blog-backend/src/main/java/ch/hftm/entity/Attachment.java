@@ -26,6 +26,8 @@ public class Attachment {
 
     private String objectKey;
 
+    private String thumbnailKey;
+
     private LocalDateTime createdAt;
 
     public Attachment() {}
@@ -81,6 +83,14 @@ public class Attachment {
 
     public void setObjectKey(String objectKey) {
         this.objectKey = objectKey;
+    }
+
+    public String getThumbnailKey() {
+        return this.thumbnailKey;
+    }
+
+    public void setThumbnailKey(String thumbnailKey) {
+        this.thumbnailKey = thumbnailKey;
     }
 
     public LocalDateTime getCreatedAt() {
