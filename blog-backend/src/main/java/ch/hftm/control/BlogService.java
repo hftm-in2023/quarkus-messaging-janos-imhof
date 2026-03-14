@@ -3,6 +3,7 @@ package ch.hftm.control;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import ch.hftm.boundary.exception.ResourceNotFoundException;
 import ch.hftm.entity.Blog;
 import ch.hftm.entity.ValidationStatus;
 import io.quarkus.logging.Log;
@@ -15,6 +16,12 @@ public class BlogService {
 
     @Inject
     BlogRepository blogRepository;
+
+    @Inject
+    AttachmentService attachmentService;
+
+    @Inject
+    CommentRepository commentRepository;
 
     public List<Blog> getBlogs() {
         Log.info("Getting all blogs");
@@ -30,7 +37,7 @@ public class BlogService {
     public Blog getBlog(long id) {
         Blog blog = blogRepository.findById(id);
         if (blog == null) {
-            throw new IllegalArgumentException("Blog mit ID " + id + " nicht gefunden.");
+            throw new ResourceNotFoundException("Blog with ID " + id + " not found.");
         }
         return blog;
     }
@@ -45,7 +52,13 @@ public class BlogService {
 
     @Transactional
     public void deleteBlog(long id) {
+        Blog blog = blogRepository.findById(id);
+        if (blog == null) {
+            throw new ResourceNotFoundException("Blog with ID " + id + " not found.");
+        }
         Log.info("Deleting blog with id " + id);
-        blogRepository.deleteById(id);
+        attachmentService.deleteAttachmentsByBlogId(id);
+        commentRepository.delete("blog.id", id);
+        blogRepository.delete(blog);
     }
 }

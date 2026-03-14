@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
+import ch.hftm.boundary.exception.ResourceNotFoundException;
 import ch.hftm.entity.Attachment;
 import ch.hftm.entity.Blog;
 import io.quarkus.logging.Log;
@@ -13,10 +14,6 @@ import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class AttachmentService {
-
-    public static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-    public static final List<String> ALLOWED_CONTENT_TYPES = List.of(
-            "image/jpeg", "image/png", "image/gif", "application/pdf");
 
     @Inject
     AttachmentRepository attachmentRepository;
@@ -32,18 +29,10 @@ public class AttachmentService {
             InputStream fileData) {
         Blog blog = blogRepository.findById(blogId);
         if (blog == null) {
-            throw new IllegalArgumentException("Blog with ID " + blogId + " not found.");
+            throw new ResourceNotFoundException("Blog with ID " + blogId + " not found.");
         }
 
-        if (fileSize > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException(
-                    "File too large. Maximum size: 5 MB, actual size: " + (fileSize / 1024) + " KB.");
-        }
-
-        if (!ALLOWED_CONTENT_TYPES.contains(contentType)) {
-            throw new IllegalArgumentException(
-                    "Content type '" + contentType + "' not allowed. Allowed: " + ALLOWED_CONTENT_TYPES);
-        }
+        FileValidator.validateAttachment(contentType, fileSize);
 
         String objectKey = "blogs/" + blogId + "/" + UUID.randomUUID() + "_" + fileName;
 
@@ -60,7 +49,7 @@ public class AttachmentService {
     public List<Attachment> getAttachments(Long blogId) {
         Blog blog = blogRepository.findById(blogId);
         if (blog == null) {
-            throw new IllegalArgumentException("Blog with ID " + blogId + " not found.");
+            throw new ResourceNotFoundException("Blog with ID " + blogId + " not found.");
         }
         return attachmentRepository.findByBlogId(blogId);
     }
@@ -68,7 +57,8 @@ public class AttachmentService {
     public Attachment getAttachment(Long blogId, Long attachmentId) {
         Attachment attachment = attachmentRepository.findById(attachmentId);
         if (attachment == null || !attachment.getBlog().getId().equals(blogId)) {
-            throw new IllegalArgumentException("Attachment with ID " + attachmentId + " not found for blog " + blogId + ".");
+            throw new ResourceNotFoundException(
+                    "Attachment with ID " + attachmentId + " not found for blog " + blogId + ".");
         }
         return attachment;
     }

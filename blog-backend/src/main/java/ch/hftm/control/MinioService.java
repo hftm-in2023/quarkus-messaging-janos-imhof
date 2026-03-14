@@ -2,6 +2,7 @@ package ch.hftm.control;
 
 import java.io.InputStream;
 
+import ch.hftm.boundary.exception.FileStorageException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import io.minio.BucketExistsArgs;
@@ -42,12 +43,12 @@ public class MinioService {
             boolean exists = minioClient.bucketExists(
                     BucketExistsArgs.builder().bucket(bucketName).build());
             if (!exists) {
-                throw new RuntimeException("Bucket '" + bucketName + "' does not exist in MinIO");
+                throw new FileStorageException("Bucket '" + bucketName + "' does not exist in MinIO");
             }
-        } catch (RuntimeException e) {
+        } catch (FileStorageException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to connect to MinIO", e);
+            throw new FileStorageException("Failed to connect to MinIO", e);
         }
     }
 
@@ -61,7 +62,7 @@ public class MinioService {
                             .contentType(contentType)
                             .build());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to upload file to MinIO", e);
+            throw new FileStorageException("Failed to upload file to MinIO", e);
         }
     }
 
@@ -73,7 +74,7 @@ public class MinioService {
                             .object(key)
                             .build());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to download file from MinIO", e);
+            throw new FileStorageException("Failed to download file from MinIO", e);
         }
     }
 
@@ -85,7 +86,7 @@ public class MinioService {
                             .object(key)
                             .build());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to delete file from MinIO", e);
+            throw new FileStorageException("Failed to delete file from MinIO", e);
         }
     }
 
@@ -100,7 +101,7 @@ public class MinioService {
         } catch (ErrorResponseException e) {
             return false;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to check file existence in MinIO", e);
+            throw new FileStorageException("Failed to check file existence in MinIO", e);
         }
     }
 }
