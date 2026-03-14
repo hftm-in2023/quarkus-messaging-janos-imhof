@@ -59,6 +59,8 @@ public class BlogService {
         Log.info("Deleting blog with id " + id);
         attachmentService.deleteAttachmentsByBlogId(id);
         commentRepository.delete("blog.id", id);
-        blogRepository.delete(blog);
+        blogRepository.getEntityManager().flush();
+        blogRepository.getEntityManager().clear();
+        blogRepository.deleteById(id);
     }
 }
