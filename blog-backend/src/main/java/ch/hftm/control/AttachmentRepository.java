@@ -18,11 +18,8 @@ public class AttachmentRepository implements PanacheRepository<Attachment> {
     }
 
     public long getTotalStorageByBlogId(Long blogId) {
-        Long total = getEntityManager()
-                .createQuery("SELECT COALESCE(SUM(a.fileSize), 0) FROM Attachment a WHERE a.blog.id = :blogId",
-                        Long.class)
-                .setParameter("blogId", blogId)
-                .getSingleResult();
-        return total;
+        return findByBlogId(blogId).stream()
+                .mapToLong(Attachment::getFileSize)
+                .sum();
     }
 }
