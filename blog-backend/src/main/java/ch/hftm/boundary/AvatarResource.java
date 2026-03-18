@@ -2,10 +2,7 @@ package ch.hftm.boundary;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 
-import ch.hftm.boundary.exception.FileStorageException;
-import ch.hftm.boundary.exception.FileValidationException;
 import ch.hftm.boundary.exception.ResourceNotFoundException;
 import ch.hftm.control.FileValidator;
 import ch.hftm.control.MinioService;
@@ -30,22 +27,17 @@ public class AvatarResource {
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadAvatar(@PathParam("username") String username, @RestForm("file") FileUpload file) {
+    public Response uploadAvatar(@PathParam("username") String username, @RestForm("file") FileUpload file)
+            throws IOException {
         Log.info("POST /users/" + username + "/avatar");
 
-        if (file == null || file.fileName() == null) {
-            throw new FileValidationException("No file uploaded.");
-        }
-
-        String contentType = file.contentType();
-        long fileSize = file.size();
-
-        FileValidator.validateAvatar(contentType, fileSize);
+        FileValidator.validateUpload(file);
+        FileValidator.validateAvatar(file.contentType(), file.size());
 
         String objectKey = "avatars/" + username;
 
-        try (InputStream inputStream = Files.newInputStream(file.uploadedFile())) {
-            minioService.uploadFile(objectKey, inputStream, fileSize, contentType);
+        try (InputStream inputStream = FileValidator.openStream(file)) {
+            minioService.uploadFile(objectKey, inputStream, file.size(), file.contentType());
             Log.info("Avatar uploaded for user: " + username);
             return Response.ok()
                     .entity(Json.createObjectBuilder()
@@ -53,9 +45,6 @@ public class AvatarResource {
                             .add("username", username)
                             .build().toString())
                     .build();
-        } catch (IOException e) {
-            Log.error("Error reading uploaded avatar file", e);
-            throw new FileStorageException("Error processing the uploaded file.", e);
         }
     }
 

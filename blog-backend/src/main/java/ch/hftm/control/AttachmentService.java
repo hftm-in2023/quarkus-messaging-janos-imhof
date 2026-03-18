@@ -44,8 +44,6 @@ public class AttachmentService {
             throw new ResourceNotFoundException("Blog with ID " + blogId + " not found.");
         }
 
-        FileValidator.validateAttachment(contentType, fileSize);
-
         long currentUsage = attachmentRepository.getTotalStorageByBlogId(blogId);
         if (currentUsage + fileSize > storageQuotaPerBlog) {
             throw new StorageQuotaExceededException(

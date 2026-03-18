@@ -2,14 +2,11 @@ package ch.hftm.boundary;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.List;
 
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 
-import ch.hftm.boundary.exception.FileStorageException;
-import ch.hftm.boundary.exception.FileValidationException;
 import ch.hftm.boundary.exception.ResourceNotFoundException;
 import ch.hftm.control.AttachmentService;
 import ch.hftm.control.BlogService;
@@ -50,32 +47,23 @@ public class AttachmentResource {
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadAttachment(@PathParam("blogId") Long blogId, @RestForm("file") FileUpload file) {
+    public Response uploadAttachment(@PathParam("blogId") Long blogId, @RestForm("file") FileUpload file)
+            throws IOException {
         Log.info("POST /blogs/" + blogId + "/attachments");
 
-        if (file == null || file.fileName() == null) {
-            throw new FileValidationException("No file uploaded.");
-        }
+        FileValidator.validateUpload(file);
+        FileValidator.validateAttachment(file.contentType(), file.size());
 
-        String contentType = file.contentType();
-        long fileSize = file.size();
-        String fileName = file.fileName();
-
-        FileValidator.validateAttachment(contentType, fileSize);
-
-        try (InputStream inputStream = Files.newInputStream(file.uploadedFile())) {
-            Attachment attachment = attachmentService.uploadAttachment(blogId, fileName, contentType, fileSize,
-                    inputStream);
+        try (InputStream inputStream = FileValidator.openStream(file)) {
+            Attachment attachment = attachmentService.uploadAttachment(blogId, file.fileName(), file.contentType(),
+                    file.size(), inputStream);
 
             Blog blog = blogService.getBlog(blogId);
             attachmentEventEmitter.send(
-                    new AttachmentEvent(blogId, blog.getTitle(), fileName, contentType, fileSize));
+                    new AttachmentEvent(blogId, blog.getTitle(), file.fileName(), file.contentType(), file.size()));
             Log.info("Attachment event sent for blog id=" + blogId);
 
             return Response.status(Response.Status.CREATED).entity(attachment).build();
-        } catch (IOException e) {
-            Log.error("Error reading uploaded file", e);
-            throw new FileStorageException("Error processing the uploaded file.", e);
         }
     }
 

@@ -1,8 +1,14 @@
 package ch.hftm.control;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.List;
 
+import ch.hftm.boundary.exception.FileStorageException;
 import ch.hftm.boundary.exception.FileValidationException;
+import io.quarkus.logging.Log;
+import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 public final class FileValidator {
 
@@ -39,5 +45,20 @@ public final class FileValidator {
 
     public static void validateAvatar(String contentType, long fileSize) {
         validateFile(contentType, fileSize, ALLOWED_IMAGE_TYPES);
+    }
+
+    public static void validateUpload(FileUpload file) {
+        if (file == null || file.fileName() == null) {
+            throw new FileValidationException("No file uploaded.");
+        }
+    }
+
+    public static InputStream openStream(FileUpload file) {
+        try {
+            return Files.newInputStream(file.uploadedFile());
+        } catch (IOException e) {
+            Log.error("Error reading uploaded file", e);
+            throw new FileStorageException("Error processing the uploaded file.", e);
+        }
     }
 }

@@ -45,13 +45,9 @@ public class BlogResource {
 
     @GET
     @Path("{id}")
-    public Response getBlog(@PathParam("id") long id) {
+    public Blog getBlog(@PathParam("id") long id) {
         Log.info("GET /blogs/" + id);
-        Blog blog = blogService.getBlog(id);
-        if (blog == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        return Response.ok(blog).build();
+        return blogService.getBlog(id);
     }
 
     @POST
