@@ -11,7 +11,7 @@ import ch.hftm.boundary.exception.ResourceNotFoundException;
 import ch.hftm.boundary.exception.StorageQuotaExceededException;
 import ch.hftm.entity.Attachment;
 import ch.hftm.entity.Blog;
-import ch.hftm.entity.StorageInfo;
+import ch.hftm.boundary.dto.StorageInfo;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

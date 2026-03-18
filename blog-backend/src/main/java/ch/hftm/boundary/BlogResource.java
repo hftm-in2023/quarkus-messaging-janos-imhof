@@ -8,7 +8,7 @@ import org.eclipse.microprofile.reactive.messaging.Emitter;
 import ch.hftm.control.AttachmentService;
 import ch.hftm.control.BlogService;
 import ch.hftm.entity.Blog;
-import ch.hftm.entity.StorageInfo;
+import ch.hftm.boundary.dto.StorageInfo;
 import ch.hftm.messaging.ValidationRequest;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;

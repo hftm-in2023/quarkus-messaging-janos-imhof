@@ -1,4 +1,4 @@
-package ch.hftm.entity;
+package ch.hftm.boundary.dto;
 
 public class StorageInfo {
 
