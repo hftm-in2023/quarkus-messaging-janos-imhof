@@ -23,6 +23,14 @@ public class NotificationService {
     }
 
     @Transactional
+    public void createAttachmentNotification(long blogId, String blogTitle, String fileName) {
+        String message = "New attachment \"" + fileName + "\" added to blog \"" + blogTitle + "\"";
+        Notification notification = new Notification(blogId, blogTitle, null, message);
+        notification.persist();
+        Log.info("Created attachment notification for blog id=" + blogId + ", file=" + fileName);
+    }
+
+    @Transactional
     public Notification markAsRead(long id) {
         Notification notification = Notification.findById(id);
         if (notification != null) {

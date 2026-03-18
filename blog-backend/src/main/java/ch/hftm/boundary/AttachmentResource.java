@@ -5,13 +5,19 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.List;
 
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
+
 import ch.hftm.boundary.exception.FileStorageException;
 import ch.hftm.boundary.exception.FileValidationException;
 import ch.hftm.boundary.exception.ResourceNotFoundException;
 import ch.hftm.control.AttachmentService;
+import ch.hftm.control.BlogService;
 import ch.hftm.control.FileValidator;
 import ch.hftm.control.MinioService;
 import ch.hftm.entity.Attachment;
+import ch.hftm.entity.Blog;
+import ch.hftm.messaging.AttachmentEvent;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -33,7 +39,14 @@ public class AttachmentResource {
     AttachmentService attachmentService;
 
     @Inject
+    BlogService blogService;
+
+    @Inject
     MinioService minioService;
+
+    @Inject
+    @Channel("attachment-events")
+    Emitter<AttachmentEvent> attachmentEventEmitter;
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -53,6 +66,12 @@ public class AttachmentResource {
         try (InputStream inputStream = Files.newInputStream(file.uploadedFile())) {
             Attachment attachment = attachmentService.uploadAttachment(blogId, fileName, contentType, fileSize,
                     inputStream);
+
+            Blog blog = blogService.getBlog(blogId);
+            attachmentEventEmitter.send(
+                    new AttachmentEvent(blogId, blog.getTitle(), fileName, contentType, fileSize));
+            Log.info("Attachment event sent for blog id=" + blogId);
+
             return Response.status(Response.Status.CREATED).entity(attachment).build();
         } catch (IOException e) {
             Log.error("Error reading uploaded file", e);
