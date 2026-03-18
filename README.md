@@ -9,10 +9,11 @@ docker compose up
 ```
 Das startet automatisch:
 1. **Redpanda** (Kafka-Broker)
-2. **Topic-Erstellung** (alle 5 Topics)
+2. **Topic-Erstellung** (alle 6 Topics)
 3. **Blog-Backend** (Port 8080)
 4. **Text-Processing-Service** (Port 8081)
 5. **Notification-Service** (Port 8082)
+6. **MinIO** (Object Storage, API Port 9000, Console Port 9001)
 
 Warten bis alle Container gestartet sind (~10 Sekunden).
 
@@ -29,6 +30,8 @@ Warten bis alle Container gestartet sind (~10 Sekunden).
 | Text-Processing-Service | 8081 |
 | Notification-Service | 8082 |
 | Redpanda (Kafka) | 9092 |
+| MinIO (API) | 9000 |
+| MinIO (Console) | 9001 |
 
 ## Kafka-Topics
 
@@ -39,6 +42,7 @@ Warten bis alle Container gestartet sind (~10 Sekunden).
 | `summary-request` | Blog-Backend | Text-Processing | Request/Response |
 | `summary-response` | Text-Processing | Blog-Backend | Request/Response |
 | `comment-events` | Blog-Backend | Notification | Fire-and-Forget |
+| `attachment-events` | Blog-Backend | Notification | Fire-and-Forget |
 
 ## API-Endpoints
 
@@ -53,6 +57,14 @@ Warten bis alle Container gestartet sind (~10 Sekunden).
 | `DELETE` | `/blogs/{id}` | Blog löschen |
 | `GET` | `/blogs/{id}/comments` | Kommentare eines Blogs |
 | `POST` | `/blogs/{id}/comments` | Kommentar erstellen |
+| `POST` | `/blogs/{id}/attachments` | Datei hochladen (Multipart) |
+| `GET` | `/blogs/{id}/attachments` | Attachments auflisten |
+| `GET` | `/blogs/{id}/attachments/{attId}` | Datei herunterladen |
+| `GET` | `/blogs/{id}/attachments/{attId}/thumbnail` | Thumbnail herunterladen |
+| `DELETE` | `/blogs/{id}/attachments/{attId}` | Attachment löschen |
+| `GET` | `/blogs/{id}/storage` | Speichernutzung anzeigen |
+| `POST` | `/users/{username}/avatar` | Profilbild hochladen (Multipart) |
+| `GET` | `/users/{username}/avatar` | Profilbild abrufen |
 
 ### Notification-Service (Port 8082)
 
@@ -97,6 +109,23 @@ curl -s http://localhost:8082/notifications | jq
 curl -s -X PUT http://localhost:8082/notifications/1/read | jq
 ```
 
+### Datei hochladen
+
+```bash
+curl -s -X POST http://localhost:8080/blogs/1/attachments \
+  -F "file=@bild.png;type=image/png" | jq
+```
+
+Erlaubte Typen: `image/jpeg`, `image/png`, `image/gif`, `application/pdf` (max. 5 MB, Quota 20 MB pro Blog).
+Für Bilder wird automatisch ein Thumbnail generiert.
+
+### Profilbild hochladen
+
+```bash
+curl -s -X POST http://localhost:8080/users/max/avatar \
+  -F "file=@avatar.png;type=image/png" | jq
+```
+
 ## Erwarteter Flow
 
 1. **Blog erstellen** -- Status = `PENDING`, wird in DB gespeichert
@@ -104,7 +133,8 @@ curl -s -X PUT http://localhost:8082/notifications/1/read | jq
 3. **Status-Update** -- Blog wird `APPROVED` oder `REJECTED`
 4. **Summary** -- Bei `APPROVED`: Zusammenfassung wird generiert und im Blog gespeichert
 5. **Kommentar** -- Beim Erstellen wird ein Kommentar-Event an Kafka gesendet
-6. **Notification** -- Notification-Service erstellt eine Benachrichtigung
+6. **Attachment** -- Dateien werden in MinIO gespeichert, bei Bildern wird ein Thumbnail generiert
+7. **Notification** -- Notification-Service erstellt Benachrichtigungen für Kommentare und Attachments
 
 ## Dev-Modus
 
