@@ -16,7 +16,7 @@ public class NotificationService {
 
     @Transactional
     public void createNotification(long blogId, String blogTitle, String commentAuthor, String commentText) {
-        String message = commentAuthor + " hat einen Kommentar auf \"" + blogTitle + "\" hinterlassen: " + commentText;
+        String message = commentAuthor + " commented on \"" + blogTitle + "\": " + commentText;
         Notification notification = new Notification(blogId, blogTitle, commentAuthor, message);
         notification.persist();
         Log.info("Created notification for blog id=" + blogId + " by " + commentAuthor);

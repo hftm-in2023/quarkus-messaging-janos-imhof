@@ -29,7 +29,7 @@ public class CommentService {
     public Comment addComment(long blogId, Comment comment) {
         Blog blog = blogRepository.findById(blogId);
         if (blog == null) {
-            throw new IllegalArgumentException("Blog mit ID " + blogId + " nicht gefunden.");
+            throw new IllegalArgumentException("Blog with ID " + blogId + " not found.");
         }
         comment.setBlog(blog);
         comment.setValidationStatus(ValidationStatus.PENDING);

@@ -21,10 +21,10 @@ public class Comment {
     @JsonbTransient
     private Blog blog;
 
-    @NotBlank(message = "Author darf nicht leer sein")
+    @NotBlank(message = "Author must not be blank")
     private String author;
 
-    @NotBlank(message = "Content darf nicht leer sein")
+    @NotBlank(message = "Content must not be blank")
     private String content;
 
     @Enumerated(EnumType.STRING)

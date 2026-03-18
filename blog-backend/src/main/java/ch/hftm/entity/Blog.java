@@ -15,10 +15,10 @@ public class Blog {
     @GeneratedValue
     private Long id;
 
-    @NotBlank(message = "Title darf nicht leer sein")
+    @NotBlank(message = "Title must not be blank")
     private String title;
 
-    @NotBlank(message = "Content darf nicht leer sein")
+    @NotBlank(message = "Content must not be blank")
     private String content;
 
     @Enumerated(EnumType.STRING)
