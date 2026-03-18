@@ -5,8 +5,10 @@ import java.util.List;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 
+import ch.hftm.control.AttachmentService;
 import ch.hftm.control.BlogService;
 import ch.hftm.entity.Blog;
+import ch.hftm.entity.StorageInfo;
 import ch.hftm.messaging.ValidationRequest;
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
@@ -24,6 +26,9 @@ public class BlogResource {
 
     @Inject
     BlogService blogService;
+
+    @Inject
+    AttachmentService attachmentService;
 
     @Inject
     @Channel("validation-request")
@@ -59,6 +64,13 @@ public class BlogResource {
         );
         Log.info("Validation request sent for blog id=" + blog.getId());
         return Response.status(Response.Status.CREATED).entity(blog).build();
+    }
+
+    @GET
+    @Path("{id}/storage")
+    public StorageInfo getStorageInfo(@PathParam("id") long id) {
+        Log.info("GET /blogs/" + id + "/storage");
+        return attachmentService.getStorageInfo(id);
     }
 
     @DELETE

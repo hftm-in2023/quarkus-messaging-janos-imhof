@@ -8,12 +8,15 @@ import java.util.UUID;
 
 import ch.hftm.boundary.exception.FileStorageException;
 import ch.hftm.boundary.exception.ResourceNotFoundException;
+import ch.hftm.boundary.exception.StorageQuotaExceededException;
 import ch.hftm.entity.Attachment;
 import ch.hftm.entity.Blog;
+import ch.hftm.entity.StorageInfo;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 public class AttachmentService {
@@ -30,6 +33,9 @@ public class AttachmentService {
     @Inject
     ThumbnailService thumbnailService;
 
+    @ConfigProperty(name = "storage.quota.per-blog", defaultValue = "20971520") // 20 MB
+    long storageQuotaPerBlog;
+
     @Transactional
     public Attachment uploadAttachment(Long blogId, String fileName, String contentType, long fileSize,
             InputStream fileData) {
@@ -39,6 +45,14 @@ public class AttachmentService {
         }
 
         FileValidator.validateAttachment(contentType, fileSize);
+
+        long currentUsage = attachmentRepository.getTotalStorageByBlogId(blogId);
+        if (currentUsage + fileSize > storageQuotaPerBlog) {
+            throw new StorageQuotaExceededException(
+                    "Storage quota exceeded for blog " + blogId + ". Used: "
+                            + (currentUsage / 1024) + " KB, quota: " + (storageQuotaPerBlog / 1024)
+                            + " KB, file size: " + (fileSize / 1024) + " KB.");
+        }
 
         String uuid = UUID.randomUUID().toString();
         String objectKey = "blogs/" + blogId + "/" + uuid + "_" + fileName;
@@ -108,6 +122,16 @@ public class AttachmentService {
         Log.info("File deleted from MinIO: " + attachment.getObjectKey());
         attachmentRepository.delete(attachment);
         Log.info("Attachment deleted: " + attachmentId);
+    }
+
+    public StorageInfo getStorageInfo(Long blogId) {
+        Blog blog = blogRepository.findById(blogId);
+        if (blog == null) {
+            throw new ResourceNotFoundException("Blog with ID " + blogId + " not found.");
+        }
+        long usedBytes = attachmentRepository.getTotalStorageByBlogId(blogId);
+        int fileCount = attachmentRepository.findByBlogId(blogId).size();
+        return new StorageInfo(usedBytes, storageQuotaPerBlog, fileCount);
     }
 
     @Transactional

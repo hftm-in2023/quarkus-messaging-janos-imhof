@@ -3,6 +3,7 @@ package ch.hftm.boundary;
 import ch.hftm.boundary.exception.FileStorageException;
 import ch.hftm.boundary.exception.FileValidationException;
 import ch.hftm.boundary.exception.ResourceNotFoundException;
+import ch.hftm.boundary.exception.StorageQuotaExceededException;
 import jakarta.json.Json;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -32,6 +33,14 @@ public class ErrorMapper {
         @Override
         public Response toResponse(FileStorageException exception) {
             return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, exception.getMessage());
+        }
+    }
+
+    @Provider
+    public static class StorageQuotaMapper implements ExceptionMapper<StorageQuotaExceededException> {
+        @Override
+        public Response toResponse(StorageQuotaExceededException exception) {
+            return errorResponse(Response.Status.BAD_REQUEST, exception.getMessage());
         }
     }
 
